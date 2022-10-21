@@ -1,9 +1,6 @@
 package io.papermc.lib;
 
-import io.papermc.lib.environments.CraftBukkitEnvironment;
-import io.papermc.lib.environments.Environment;
-import io.papermc.lib.environments.PaperEnvironment;
-import io.papermc.lib.environments.SpigotEnvironment;
+import io.papermc.lib.environments.*;
 import io.papermc.lib.features.blockstatesnapshot.BlockStateSnapshotResult;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -33,7 +30,9 @@ public class PaperLib {
     private static Environment ENVIRONMENT = initialize();
 
     private static Environment initialize() {
-        if (hasClass("com.destroystokyo.paper.PaperConfig") || hasClass("io.papermc.paper.configuration.Configuration")) {
+        if (hasClass("com.saltspigot.config.SaltConfig")) {
+            return new SaltEnvironment();
+        } else if (hasClass("com.destroystokyo.paper.PaperConfig") || hasClass("io.papermc.paper.configuration.Configuration")) {
             return new PaperEnvironment();
         } else if (hasClass("org.spigotmc.SpigotConfig")) {
             return new SpigotEnvironment();
@@ -278,6 +277,14 @@ public class PaperLib {
     }
 
     /**
+     * Check if the server has access to SaltSpigot API
+     * @return True for SaltSpigot environments
+     */
+    public static boolean isSalt() {
+        return ENVIRONMENT.isSalt();
+    }
+
+    /**
      * Can be called during plugin initialization to inform the server owner they should switch to Paper
      *
      * If you do not mind helping spread Paper, please call this in your plugin onEnable to help spread
@@ -301,31 +308,5 @@ public class PaperLib {
      * @param plugin Your plugin object
      * @param logLevel The logLevel you want to choose
      */
-    public static void suggestPaper(@Nonnull Plugin plugin, @Nonnull Level logLevel) {
-        if (isPaper()) {
-            return;
-        }
-        final String benefitsProperty = "paperlib.shown-benefits";
-        final String pluginName = plugin.getDescription().getName();
-        final Logger logger = plugin.getLogger();
-        logger.log(logLevel, "====================================================");
-        logger.log(logLevel, " " + pluginName + " works better if you use Paper ");
-        logger.log(logLevel, " as your server software. ");
-        if (System.getProperty(benefitsProperty) == null) {
-            System.setProperty(benefitsProperty, "1");
-            logger.log(logLevel, "  ");
-            logger.log(logLevel, " Paper offers significant performance improvements,");
-            logger.log(logLevel, " bug fixes, security enhancements and optional");
-            logger.log(logLevel, " features for server owners to enhance their server.");
-            logger.log(logLevel, "  ");
-            logger.log(logLevel, " Paper includes Timings v2, which is significantly");
-            logger.log(logLevel, " better at diagnosing lag problems over v1.");
-            logger.log(logLevel, "  ");
-            logger.log(logLevel, " All of your plugins should still work, and the");
-            logger.log(logLevel, " Paper community will gladly help you fix any issues.");
-            logger.log(logLevel, "  ");
-            logger.log(logLevel, " Join the Paper Community @ https://papermc.io");
-        }
-        logger.log(logLevel, "====================================================");
-    }
+    public static void suggestPaper(@Nonnull Plugin plugin, @Nonnull Level logLevel) {}
 }
